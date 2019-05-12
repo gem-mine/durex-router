@@ -21,7 +21,7 @@
     "lib"
   ],
   "dependencies": {
-    "@gem-mine/durex": "^2.0.1-dev",
+    "@gem-mine/durex": "^2.0.2-dev",
     "connected-react-router": "^6.3.2",
     "path-to-regexp": "^3.0.0",
     "query-string": "^5.1.1",
