@@ -1,13 +1,13 @@
-import Router, { routerMiddleware, createRouterReducer } from './router'
 import { Route, Redirect, Switch, Prompt, withRouter } from 'react-router'
 import { Link, NavLink } from 'react-router-dom'
-import { urlFor, router, Routes } from './helper'
 import queryString from 'query-string'
 import pathToRegexp from 'path-to-regexp'
-import { applyMiddleware, combineReducers } from 'redux'
+import { addMiddleware, addReducer } from '@gem-mine/durex'
+import Router, { routerMiddleware, createRouterReducer } from './router'
+import { urlFor, router, Routes } from './helper'
 
-applyMiddleware(routerMiddleware())
-combineReducers({
+addMiddleware(routerMiddleware())
+addReducer({
   router: createRouterReducer()
 })
 

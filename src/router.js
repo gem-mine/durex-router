@@ -18,7 +18,7 @@ function _createHistory(opts) {
   if (!history) {
     let type = options.historyMode || 'hash'
     if (['hash', 'memory', 'browser'].indexOf(type) === -1) {
-      console.error('hashType should be one of hash/memory/browser')
+      console.error('historyMode should be one of hash/memory/browser')
     } else {
       const historyModes = {
         browser: createBrowserHistory,
