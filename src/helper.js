@@ -2,7 +2,6 @@ import React from 'react'
 import { Route, Switch, Redirect } from 'react-router'
 import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
-import { smart } from '@gem-mine/durex'
 
 const ROOT = '__root__'
 
@@ -20,6 +19,9 @@ const _config = {
     },
     Forbidden: props => {
       return <div>403 forbidden</div>
+    },
+    Loading: props => {
+      return <div>loading...!</div>
     }
   }
 }
@@ -141,42 +143,63 @@ function getParentKeyPath(keyPath) {
   return false
 }
 
-const Permission = receiveProps => {
-  const { component: Component, permission, ...rest } = receiveProps
-  return (
-    <Route
-      {...rest}
-      render={props => {
-        let p = receiveProps
-        let arr = []
-        while (p) {
-          if (typeof p.permission === 'function') {
-            arr.push(p.permission)
-          }
-          p = p.parent
-        }
+class Permission extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+  async componentDidMount() {
+    let p = this.props
+    let arr = []
+    while (p) {
+      if (typeof p.permission === 'function') {
+        arr.push(p.permission)
+      }
+      p = p.parent
+    }
 
-        let flag = true
-        for (let i = 0; i < arr.length; i++) {
-          flag = arr[i](receiveProps)
-          if (flag !== true) {
-            break
+    this.setState({
+      loading: true
+    })
+    let flag = true
+    for (let i = 0; i < arr.length; i++) {
+      flag = await arr[i](this.props)
+      if (flag !== true) {
+        break
+      }
+    }
+    this.setState({
+      flag,
+      loading: false
+    })
+  }
+  render() {
+    const { component: Component, permission, ...rest } = this.props
+    const { flag, loading } = this.state
+
+    return (
+      <Route
+        {...rest}
+        render={props => {
+          if (loading) {
+            return <_config.components.Loading {...props} />
+          } else {
+            if (flag === true) {
+              // 合法
+              return <Component {...props} />
+            } else {
+              // 不合法
+              if (flag) {
+                // 验证函数返回Component，直接显示
+                return flag
+              }
+              return <_config.components.Forbidden {...props} />
+            }
           }
-        }
-        if (flag === true) {
-          // 合法
-          return <Component {...props} />
-        } else {
-          // 不合法
-          if (flag) {
-            // 验证函数返回Component，直接显示
-            return flag
-          }
-          return <_config.components.Forbidden {...props} />
-        }
-      }}
-    />
-  )
+        }}
+      />
+    )
+  }
 }
 
 /**
@@ -229,11 +252,6 @@ export function urlFor(key, params) {
 export const Routes = props => {
   const { path, children } = props // eslint-disable-line
   let rs
-  let mapStateToProps = props.mapStateToProps // eslint-disable-line
-  if (!mapStateToProps) {
-    mapStateToProps = _config.mapStateToProps
-  }
-  const PermissionRoute = smart(mapStateToProps)(Permission)
   if (path) {
     rs = _sub[path]
   } else {
@@ -249,7 +267,7 @@ export const Routes = props => {
         if (route.redirect) {
           redirects.push(parseRedirect(route))
         } else if (route.component) {
-          routes.push(<PermissionRoute {...route} key={route.key} />)
+          routes.push(<Permission {...route} key={route.key} />)
         }
       }
     })
@@ -268,8 +286,7 @@ export const Routes = props => {
 export const router = {
   // 配置
   config(params) {
-    const { mapStateToProps, components } = params
-    _config.mapStateToProps = mapStateToProps
+    const { components } = params
     if (components) {
       const { NotFound, Forbidden } = components
       if (NotFound) {

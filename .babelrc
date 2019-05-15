@@ -1,7 +1,14 @@
 {
   "presets": ["es2015", "stage-0", "react"],
   "plugins": [
-      "add-module-exports",
-      "transform-object-assign"
+    "add-module-exports",
+    "transform-object-assign",
+    [
+      "transform-runtime",
+      {
+        "helpers": false,
+        "regenerator": true
+      }
+    ]
   ]
 }
