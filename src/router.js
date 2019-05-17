@@ -32,7 +32,7 @@ export function routerMiddleware() {
   return ({ getState, dispatch }) => {
     // Add `push`, `replace`, `go`, `goForward` and `goBack` methods to actions.routing,
     // when called, will dispatch the crresponding action provided by react-router-redux.
-    actions.routing = Object.keys(routerActions).reduce((memo, action) => {
+    actions.router = Object.keys(routerActions).reduce((memo, action) => {
       memo[action] = (...args) => {
         dispatch(routerActions[action](...args))
       }
