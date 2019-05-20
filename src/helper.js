@@ -21,7 +21,7 @@ const _config = {
       return <div>403 forbidden</div>
     },
     Loading: props => {
-      return <div>loading...!</div>
+      return <div>loading...</div>
     }
   }
 }
@@ -121,7 +121,7 @@ function add(parent, items) {
     if (_cache[item.path]) {
       console.warn(`${item.path} 已经被注册，生效的是首个注册的组件：`, _cache[item.path], `当前组件不生效：`, item)
     } else {
-      if (item.component && !item.index) {
+      if (item.component && !item.index && !item.sub) {
         _cache[item.path] = item
       }
     }
