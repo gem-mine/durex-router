@@ -288,13 +288,7 @@ export const router = {
   config(params) {
     const { components } = params
     if (components) {
-      const { NotFound, Forbidden } = components
-      if (NotFound) {
-        _config.components.NotFound = NotFound
-      }
-      if (Forbidden) {
-        _config.components.Forbidden = Forbidden
-      }
+      Object.assign(_config.components, components)
     }
   },
   // 路由统一注册入口
