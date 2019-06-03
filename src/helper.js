@@ -26,7 +26,7 @@ const _config = {
   }
 }
 
-// 缓存，key 是路径，用来检测该路径是否被注册，如果重复注册，用来警告
+// 缓存，key 是路径，用来检测该路径是否被注册，如果重复注册，用来警告。同时可以通过此缓存根据路径查询到对应的路由
 const _cache = {}
 
 function parseRedirect(route) {
@@ -281,6 +281,33 @@ export const Routes = props => {
       </Switch>
     )
   }
+}
+
+/**
+ * 根据 key path 获取对应的路由对象，getRouteByKeyPath('main.home')
+ * @param {string} keyPath
+ */
+export function getRouteByKeyPath(keyPath) {
+  return _routers[keyPath]
+}
+
+/**
+ * 根据 url path 获取对应的路由对象，getRouteByUrlPath('/user/home/setting')
+ * @param {string} urlPath
+ */
+export function getRouteByUrlPath(urlPath) {
+  let route = _cache[urlPath]
+  if (route) {
+    return route
+  }
+  Object.keys(_cache).some(key => {
+    const item = _cache[key]
+    const re = pathToRegexp(item.path)
+    if (re.test(urlPath)) {
+      route = item
+    }
+  })
+  return route
 }
 
 export const router = {
