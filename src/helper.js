@@ -118,11 +118,13 @@ function add(parent, items) {
       add(item, item.module)
     }
 
-    if (_cache[item.path]) {
-      console.warn(`${item.path} 已经被注册，生效的是首个注册的组件：`, _cache[item.path], `当前组件不生效：`, item)
-    } else {
-      if (item.component && !item.index && !item.sub) {
-        _cache[item.path] = item
+    if (item.component) {
+      if (_cache[item.path]) {
+        console.warn(`${item.path} 已经被注册，生效的是首个注册的组件：`, _cache[item.path], `当前组件不生效：`, item)
+      } else {
+        if (item.path !== '/') {
+          _cache[item.path] = item
+        }
       }
     }
   })
