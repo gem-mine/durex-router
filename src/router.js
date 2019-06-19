@@ -1,34 +1,32 @@
 import React from 'react'
 import { createBrowserHistory, createHashHistory, createMemoryHistory } from 'history'
 import { ConnectedRouter, routerActions, CALL_HISTORY_METHOD, connectRouter } from 'connected-react-router'
-import { actions, options } from '@gem-mine/durex'
+import { actions, addMiddleware, addReducer } from '@gem-mine/durex'
 
 let history = null
 
-function _createHistory(opts) {
+export function config(mode) {
   if (!history) {
-    let type = options.historyMode || 'hash'
+    let type = mode || 'hash'
     if (['hash', 'memory', 'browser'].indexOf(type) === -1) {
-      console.error('historyMode should be one of hash/memory/browser')
+      console.error('mode should be one of hash/memory/browser')
     } else {
       const historyModes = {
         browser: createBrowserHistory,
         hash: createHashHistory,
         memory: createMemoryHistory
       }
-      history = historyModes[type](opts)
-      return history
+      history = historyModes[type](mode)
     }
   }
-}
 
-export function createRouterReducer() {
-  _createHistory()
-  return connectRouter(history)
+  addMiddleware(routerMiddleware())
+  addReducer({
+    router: connectRouter(history)
+  })
 }
 
 export function routerMiddleware() {
-  _createHistory()
   return ({ getState, dispatch }) => {
     // Add `push`, `replace`, `go`, `goForward` and `goBack` methods to actions.routing,
     // when called, will dispatch the crresponding action provided by react-router-redux.
@@ -52,8 +50,6 @@ export function routerMiddleware() {
 }
 
 export default function Router({ children }) {
-  _createHistory()
-
   // ConnectedRouter will use the store from Provider automatically
   return <ConnectedRouter history={history}>{children}</ConnectedRouter>
 }
