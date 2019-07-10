@@ -5,12 +5,20 @@ import queryString from 'query-string'
 
 const ROOT = '__root__'
 
-// 缓存拍扁的路由信息
+// 缓存拍扁的路由信息，key 是 keyPath，value 是 路由JSON配置
+// 可以通过此缓存根据 keyPath查询到对应的路由（getRouteByKeyPath）
 const _routers = {}
-// 缓存拍扁的子路由
+
+// 缓存拍扁的子路由，key 是 keyPath, value 是所有子路由数组
 const _sub = {
   [ROOT]: [] // 根的子路由
 }
+
+// 缓存，key 是 url 路径（/user/profile），value 是 路由JSON配置
+// 用来检测该路径是否被注册，如果重复注册，用来警告
+// 同时可以通过此缓存根据路径查询到对应的路由（getRouteByUrlPath）
+const _cache = {}
+
 // 缓存 config
 const _config = {
   components: {
@@ -25,9 +33,6 @@ const _config = {
     }
   }
 }
-
-// 缓存，key 是路径，用来检测该路径是否被注册，如果重复注册，用来警告。同时可以通过此缓存根据路径查询到对应的路由
-const _cache = {}
 
 function parseRedirect(route) {
   let to = route.redirect
@@ -71,14 +76,11 @@ function add(parent, items) {
     const item = items[key]
     item.key = key
     item.keyPath = keyPath
-    if (item.path) {
-      item.path = `${pathPrefix}${item.path}`.replace(/\/\/|\/$/g, '') || '/'
-    } else {
-      item.path = '/'
-      if (item.component) {
-        item.exact = true
-      }
+    if (!item.path && item.component) {
+      item.exact = true
     }
+    item.path = `${pathPrefix}${item.path || ''}`.replace(/\/\/|\/$/g, '') || '/'
+
     let subKey = ROOT
     if (parent) {
       item.parent = parent
@@ -120,11 +122,17 @@ function add(parent, items) {
 
     if (item.component) {
       if (_cache[item.path]) {
-        console.warn(`${item.path} 已经被注册，生效的是首个注册的组件：`, _cache[item.path], `当前组件不生效：`, item)
-      } else {
-        if (item.path !== '/') {
-          _cache[item.path] = item
+        // 路由容器不参与去重判定，因为其子节点会可能存在默认路由，其路径和路由容器一致
+        if (!item.sub) {
+          console.warn(
+            `${item.path} 已经被注册，生效的是首个注册的组件：`,
+            _cache[item.path],
+            `当前组件不生效：`,
+            item
+          )
         }
+      } else {
+        _cache[item.path] = item
       }
     }
   })
@@ -176,7 +184,7 @@ class Permission extends React.Component {
     })
   }
   render() {
-    const { component: Component, permission, ...rest } = this.props
+    const { component: Component, permission, ...rest } = this.props // eslint-disable-line
     const { flag, loading } = this.state
 
     return (
@@ -252,7 +260,7 @@ export function urlFor(key, params) {
 }
 
 export const Routes = props => {
-  const { path, children } = props // eslint-disable-line
+  const { path, children } = props
   let rs
   if (path) {
     rs = _sub[path]
