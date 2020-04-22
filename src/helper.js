@@ -38,8 +38,13 @@ function parseRedirect(route) {
   let to = route.redirect
   // 有子路由的不处理 redirect，防止是跳转进入子路由引起死循环
   if (!route.sub && to) {
+    const query = queryString.parseUrl(location.href).query
     if (typeof to === 'object') {
-      to = urlFor(to.key, to.params)
+      if (typeof to.params === 'function') {
+        to = urlFor(to.key, Object.assign({}, query, to.params(query)))
+      } else {
+        to = urlFor(to.key, Object.assign({}, query, to.params))
+      }
     } else {
       const t = _routers[to]
       if (t) {
