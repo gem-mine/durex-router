@@ -48,7 +48,7 @@ function parseRedirect(route) {
     } else {
       const t = _routers[to]
       if (t) {
-        to = t.path
+        to = urlFor(t.keyPath, query)
       } else {
         console.warn(`route ${route.redirect} not exist, redirect fail, please check route config`)
       }
