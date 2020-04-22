@@ -1,6 +1,6 @@
 {
   "name": "@gem-mine/durex-router",
-  "version": "1.4.1-rc",
+  "version": "1.4.1",
   "description": "router for @gem-mine/durex",
   "keywords": [
     "durex",
