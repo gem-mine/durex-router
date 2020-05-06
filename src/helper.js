@@ -34,7 +34,7 @@ const _config = {
   }
 }
 
-function getQuery(url) {
+export function getQuery(url) {
   let query = url.split('?')[1]
   if (query) {
     if (query.indexOf('#') > -1) {
@@ -46,11 +46,12 @@ function getQuery(url) {
   return {}
 }
 
-function parseRedirect(route) {
-  let to = route.redirect
-  // 有子路由的不处理 redirect，防止是跳转进入子路由引起死循环
-  if (!route.sub && to) {
-    const query = getQuery(location.href)
+function parseRedirect({ from, to }) {
+  const query = getQuery(location.href)
+  if (typeof to === 'function') {
+    to = to({ from, to })
+  }
+  if (to) {
     if (typeof to === 'object') {
       if (typeof to.params === 'function') {
         Object.assign(query, to.params(query))
@@ -63,17 +64,26 @@ function parseRedirect(route) {
       if (t) {
         to = t.path
       } else {
-        console.warn(`route ${route.redirect} not exist, redirect fail, please check route config`)
+        console.warn(`route ${to} not exist, redirect fail, please check route config`)
       }
     }
     if (to) {
-      if (route.path !== to) {
-        return <Redirect exact from={route.path} to={{
-          pathname: to,
-          search: queryString.stringify(Object.assign({}, query))
-        }} key={route.key} />
-      }
+      return <Redirect exact from={from} to={{
+        pathname: to,
+        search: queryString.stringify(Object.assign({}, query))
+      }} key={to} />
     }
+  }
+}
+
+function _parseRedirect(route) {
+  let to = route.redirect
+  // 有子路由的不处理 redirect，防止是跳转进入子路由引起死循环
+  if (!route.sub && to) {
+    return parseRedirect({
+      from: route.path,
+      to
+    })
   }
 }
 
@@ -295,8 +305,12 @@ export const Routes = props => {
 
     rs.forEach(route => {
       if (route) {
+        let redirect
         if (route.redirect) {
-          redirects.push(parseRedirect(route))
+          redirect = _parseRedirect(route)
+        }
+        if (redirect) {
+          redirects.push(redirect)
         } else if (route.component) {
           routes.push(<Permission {...route} key={route.key} />)
         }
@@ -305,8 +319,8 @@ export const Routes = props => {
 
     return (
       <Switch>
-        {routes}
         {redirects}
+        {routes}
         {children}
         <Route component={_config.components.NotFound} />
       </Switch>
