@@ -9,6 +9,7 @@ let history = null
  * Create history
  *
  * @param {String} mode history mode should be one of hash/memory/browser
+ * @retrun {History} history
  */
 export function createHistory(mode) {
   if (!history) {
@@ -36,7 +37,7 @@ export function createHistory(mode) {
 /**
  * Config history
  *
- * @deprecated
+ * @deprecated use `createHistory(mode)` or `router.config({ mode })` instead
  */
 export const config = createHistory
 
