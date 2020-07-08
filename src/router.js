@@ -5,7 +5,13 @@ import { actions, addMiddleware, addReducer } from '@gem-mine/durex'
 
 let history = null
 
-export function config(mode) {
+/**
+ * Create history
+ *
+ * @param {String} mode history mode should be one of hash/memory/browser
+ * @retrun {History} history
+ */
+export function createHistory(mode) {
   if (!history) {
     let type = mode || 'hash'
     if (['hash', 'memory', 'browser'].indexOf(type) === -1) {
@@ -18,13 +24,22 @@ export function config(mode) {
       }
       history = historyModes[type](mode)
     }
+
+    addMiddleware(routerMiddleware())
+    addReducer({
+      router: connectRouter(history)
+    })
   }
 
-  addMiddleware(routerMiddleware())
-  addReducer({
-    router: connectRouter(history)
-  })
+  return history
 }
+
+/**
+ * Config history
+ *
+ * @deprecated use `createHistory(mode)` or `router.config({ mode })` instead
+ */
+export const config = createHistory
 
 function routerMiddleware() {
   return ({ getState, dispatch }) => {
