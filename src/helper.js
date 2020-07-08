@@ -3,8 +3,6 @@ import { Route, Switch, Redirect } from 'react-router'
 import pathToRegexp from 'path-to-regexp'
 import queryString from 'query-string'
 
-import { createHistory } from './router'
-
 const ROOT = '__root__'
 
 // 缓存拍扁的路由信息，key 是 keyPath，value 是 路由JSON配置
@@ -359,11 +357,8 @@ export function getRouteByUrlPath(urlPath) {
 
 export const router = {
   // 配置
-  config({
-    mode,
-    components
-  } = {}) {
-    createHistory(mode)
+  config(params) {
+    const { components } = params
     if (components) {
       Object.assign(_config.components, components)
     }
