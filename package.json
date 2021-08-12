@@ -1,6 +1,6 @@
 {
   "name": "@gem-mine/durex-router",
-  "version": "1.5.0",
+  "version": "1.5.1-rc",
   "description": "router for @gem-mine/durex",
   "keywords": [
     "durex",
@@ -21,7 +21,7 @@
     "lib"
   ],
   "dependencies": {
-    "@gem-mine/durex": "^2.0.6",
+    "@gem-mine/durex": "^2.2.0-rc",
     "babel-runtime": "^6.26.0",
     "connected-react-router": "^6.5.2",
     "path-to-regexp": "^3.0.0",
