@@ -360,10 +360,16 @@ export function getRouteByUrlPath(urlPath) {
 export const router = {
   // 配置
   config({
+    /**
+     * @deprecate use `history` instead
+     */
     mode,
+    history,
     components
   } = {}) {
-    createHistory(mode)
+    if (mode || history) {
+      createHistory(mode || history)
+    }
     if (components) {
       Object.assign(_config.components, components)
     }

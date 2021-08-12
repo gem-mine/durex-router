@@ -6,14 +6,14 @@ import { actions, addMiddleware, addReducer } from '@gem-mine/durex'
 let history = null
 
 /**
- * Create history
- *
- * @param {String} mode history mode should be one of hash/memory/browser
- * @retrun {History} history
+ * @param opts: hash/browser/memory/{mode: hash/browser/memory, basename:}
+ * @returns History
  */
-export function createHistory(mode) {
+export function createHistory(opts) {
+  // 兼容历史错误，opts 应该是个对象，但中间版本是 string，导致路由模式只能是 hash
+  const mode = typeof opts === 'object' ? opts.mode : opts
   if (!history) {
-    let type = mode || 'hash'
+    const type = mode || 'hash'
     if (['hash', 'memory', 'browser'].indexOf(type) === -1) {
       console.error('mode should be one of hash/memory/browser')
     } else {
@@ -22,7 +22,7 @@ export function createHistory(mode) {
         hash: createHashHistory,
         memory: createMemoryHistory
       }
-      history = historyModes[type](mode)
+      history = historyModes[type](opts)
     }
 
     addMiddleware(routerMiddleware())
@@ -35,9 +35,7 @@ export function createHistory(mode) {
 }
 
 /**
- * Config history
- *
- * @deprecated use `createHistory(mode)` or `router.config({ mode })` instead
+ * `createHistory(opts)` alias `router.config(opts)`
  */
 export const config = createHistory
 
